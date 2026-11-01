@@ -160,6 +160,12 @@ section.view.on{display:block}
 .ev.open .more{display:block}
 .ev .tog{font-size:12px;color:var(--coral);background:none;border:0;padding:4px 0 0}
 .edit-only{display:none!important}
+.ev .ord{display:flex;gap:4px;flex:none}
+.ev .handle{cursor:grab;touch-action:none;font-size:18px;color:var(--muted);user-select:none}
+.ev.dragging{opacity:.85;z-index:5}
+.ev.dragging .box{box-shadow:0 0 0 2px var(--dc),0 12px 28px rgba(60,40,20,.25);transform:scale(1.02)}
+.reorder-tip{display:none;font-size:13px;color:#8a6a14;background:var(--yellow-soft);border-radius:10px;padding:6px 10px;margin:-4px 0 12px}
+body.editing .reorder-tip{display:block}
 body.editing .edit-only{display:inline-flex!important}
 .iconbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;display:inline-grid;place-items:center;flex:none}
 .iconbtn svg{width:17px;height:17px}
@@ -315,6 +321,7 @@ textarea.notes{width:100%;min-height:340px;border:1px solid var(--line);border-r
     </div>
     <div class="days" id="dayTabs"></div>
     <div class="banner" id="dayBanner"><span class="credit" id="bannerCredit"></span><div class="t"><span class="en" id="dayEn"></span><h3 id="dayTitle"></h3><div class="small" id="dayDate"></div></div></div>
+    <div class="reorder-tip">調整順序：按 ▲▼，或按住 ⠿ 上下拖曳。</div>
     <div class="tl" id="timeline"></div>
     <p class="small muted">點標題可展開說明。順序可依實際抵達時間調整，沒寫時間的是彈性安排。</p>
 
@@ -622,6 +629,7 @@ function renderPlan(){
       <div class="box">
         <div class="row">
           <button class="ttl" data-act="toggle">${esc(x.title)}</button>
+          <span class="ord edit-only"><button class="iconbtn" data-act="up" aria-label="往上移">▲</button><button class="iconbtn" data-act="down" aria-label="往下移">▼</button><span class="iconbtn handle" data-act="drag" aria-label="拖曳排序">⠿</span></span>
           <button class="iconbtn edit-only" data-act="edit" aria-label="編輯"><svg><use href="#i-edit"/></svg></button>
           <button class="iconbtn edit-only" data-act="del" aria-label="刪除"><svg><use href="#i-trash"/></svg></button>
         </div>
@@ -631,10 +639,22 @@ function renderPlan(){
     </div>`).join(""):`<p class="muted">這天還沒有行程，按右上角「編輯」再「新增」。</p>`;
   $("linkList").innerHTML=live(state.links).map(l=>`<div class="lk" data-id="${l.id}"><div class="x"><b>${esc(l.title)} <span class="chip">${esc(l.cat||"其他")}</span></b>${l.note?`<div class="small">${esc(l.note)}</div>`:""}<span>${esc(l.url)}</span></div><a class="btn sm" href="${esc(l.url)}">開啟 ↗</a><button class="iconbtn edit-only" data-act="ldel" aria-label="刪除"><svg><use href="#i-trash"/></svg></button></div>`).join("")||`<p class="muted small">還沒有收藏，看到想去的店或景點，按「＋ 連結」貼上網址。</p>`;
 }
+function applyOrder(ids){const p={};ids.forEach((id,i)=>{const o=(i+1)*10;if(state.events[id].order!==o)p[id]={order:o}});if(Object.keys(p).length)patch({events:p})}
+function moveEvent(id,dir){const ids=live(state.events).filter(x=>x.day===curDay).map(x=>x.id);const i=ids.indexOf(id),j=i+dir;if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];applyOrder(ids)}
+(function(){let drag=null;
+  $("timeline").addEventListener("pointerdown",e=>{const h=e.target.closest(".handle");if(!h)return;e.preventDefault();const row=h.closest(".ev");drag={row,id:row.dataset.id};row.classList.add("dragging");h.setPointerCapture(e.pointerId)});
+  $("timeline").addEventListener("pointermove",e=>{if(!drag)return;const rows=[...$("timeline").querySelectorAll(".ev")].filter(r=>r!==drag.row);
+    const after=rows.find(r=>{const b=r.getBoundingClientRect();return e.clientY<b.top+b.height/2});$("timeline").insertBefore(drag.row,after||null);
+    if(e.clientY<60)window.scrollBy(0,-12);else if(e.clientY>innerHeight-90)window.scrollBy(0,12)});
+  const end=()=>{if(!drag)return;drag.row.classList.remove("dragging");const ids=[...$("timeline").querySelectorAll(".ev")].map(r=>r.dataset.id);drag=null;applyOrder(ids)};
+  $("timeline").addEventListener("pointerup",end);$("timeline").addEventListener("pointercancel",end);
+})();
 $("dayTabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b){curDay=+b.dataset.i;renderPlan()}});
 $("timeline").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b) return; const row=b.closest(".ev"); const id=row.dataset.id;
   if(b.dataset.act==="toggle"){row.classList.toggle("open");const t=row.querySelector(".tog");if(t)t.textContent=row.classList.contains("open")?"收合 ▴":"展開說明 ▾"}
+  if(b.dataset.act==="up") moveEvent(id,-1);
+  if(b.dataset.act==="down") moveEvent(id,1);
   if(b.dataset.act==="edit") openEvent(state.events[id]);
   if(b.dataset.act==="del") confirmSheet("刪除這個行程？",state.events[id].title,()=>patch({events:{[id]:{deleted:true}}}));
 });
