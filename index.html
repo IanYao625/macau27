@@ -35,7 +35,8 @@ a{color:var(--teal)}
 .top{position:sticky;top:0;z-index:20;background:rgba(247,240,227,.93);backdrop-filter:blur(10px);border-bottom:1px dashed #d9cbb4;padding-top:var(--safe-t)}
 .top .wrap{display:flex;align-items:center;gap:10px;height:56px}
 .brand{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px}
-.brand b{font-family:var(--hand);font-size:20px;color:var(--teal)}
+.brand b{font-family:var(--hand);font-size:20px;color:var(--teal);white-space:nowrap}
+@media(max-width:420px){.brand .en{display:none}}
 .brand .en{font-size:20px;color:var(--coral)}
 .sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap;background:var(--card);border:1px solid var(--line);padding:3px 10px;border-radius:999px}
 .dot{width:7px;height:7px;border-radius:50%;background:#bbb}
@@ -82,21 +83,20 @@ section.view.on{display:block}
 .hero .en{font-size:26px;color:#ffe3a3;display:block;line-height:1}
 .hero h1{font-size:52px;letter-spacing:.06em;text-shadow:0 2px 14px rgba(0,0,0,.35)}
 .hero .sub{font-size:15px;opacity:.95;margin-top:4px}
-.hero .credit{position:absolute;z-index:2;right:10px;top:10px;font-size:10px;opacity:.7;background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px}
-.stamp{position:absolute;z-index:3;right:18px;bottom:30px;width:92px;padding:9px 6px 7px;background:#fffaf0;color:var(--coral);text-align:center;transform:rotate(5deg);
-  filter:drop-shadow(0 4px 10px rgba(0,0,0,.3));
-  -webkit-mask:radial-gradient(circle 4px at 4px 4px,transparent 98%,#000) -4px -4px/9px 9px;mask:radial-gradient(circle 4px at 4px 4px,transparent 98%,#000) -4px -4px/9px 9px}
+.hero .credit{position:absolute;z-index:2;right:8px;bottom:6px;font-size:10px;opacity:.7;background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px}
+.stamp{position:absolute;z-index:3;right:18px;top:22px;width:92px;padding:9px 6px 7px;background:#fffaf0;color:var(--coral);text-align:center;transform:rotate(5deg);
+  box-shadow:0 0 0 3px #fffaf0,0 0 0 5px rgba(208,101,63,.35),0 6px 16px rgba(0,0,0,.3);border-radius:4px}
 .stamp .in{border:1.5px dashed var(--coral);padding:4px 2px;line-height:1.1}
 .stamp b{display:block;font-family:var(--hand);font-size:34px;color:var(--ink)}
 .stamp span{font-size:11px;display:block}
 .plane-path{position:absolute;z-index:2;left:0;top:18%;width:100%;height:120px;opacity:.85}
-@media(min-width:760px){.hero{margin:16px 0 0;border-radius:24px;height:460px}.hero h1{font-size:64px}.hero .t{left:36px;bottom:34px}.stamp{right:40px;bottom:40px;width:110px}.stamp b{font-size:42px}}
+@media(min-width:760px){.hero{margin:16px 0 0;border-radius:24px;height:460px}.hero h1{font-size:64px}.hero .t{left:36px;bottom:34px}.stamp{right:40px;top:auto;bottom:44px;width:110px}.stamp b{font-size:42px}}
 
 /* sticky note */
 .note{position:relative;background:#fdf1bf;padding:16px 18px 14px;border-radius:4px 4px 14px 4px;box-shadow:0 8px 18px rgba(120,90,20,.16);transform:rotate(-1.2deg);margin:22px 6px 0}
 .note:before{content:"";position:absolute;top:-11px;left:50%;width:96px;height:22px;transform:translateX(-50%) rotate(2deg);background:rgba(159,209,192,.75);border-left:2px dotted rgba(255,255,255,.6);border-right:2px dotted rgba(255,255,255,.6)}
 .note .lbl{font-size:13px;color:#8a6a14}
-.note .task{font-family:var(--hand);font-size:21px;font-weight:700;margin:2px 0 8px}
+.note .ntask{font-family:var(--hand);font-size:21px;font-weight:700;margin:2px 0 8px}
 .bar{height:8px;border-radius:9px;background:rgba(138,106,20,.15);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--coral);border-radius:9px;transition:width .3s}
 
@@ -288,7 +288,7 @@ textarea.notes{width:100%;min-height:340px;border:1px solid var(--line);border-r
       <div>
         <div class="note">
           <div class="lbl">下一件待辦</div>
-          <div class="task" id="nextTask"></div>
+          <div class="ntask" id="nextTask"></div>
           <div class="bar"><i id="prepBar"></i></div>
           <div class="small" style="margin-top:6px;color:#8a6a14"><span id="prepText"></span>，<a href="#prep" style="color:#8a6a14">看全部準備事項</a></div>
         </div>
@@ -342,7 +342,7 @@ textarea.notes{width:100%;min-height:340px;border:1px solid var(--line);border-r
         <button class="btn sm pri" id="addTask">＋ 新增</button>
       </div>
     </div>
-    <div class="note" style="margin:6px 4px 4px;transform:rotate(.6deg)"><div class="task" id="prepText2" style="margin:0 0 8px"></div><div class="bar"><i id="prepBar2"></i></div></div>
+    <div class="note" style="margin:6px 4px 4px;transform:rotate(.6deg)"><div class="ntask" id="prepText2" style="margin:0 0 8px"></div><div class="bar"><i id="prepBar2"></i></div></div>
     <div id="phases"></div>
   </section>
 
